@@ -33,8 +33,7 @@ class ResultActivity : AppCompatActivity() {
 
     private fun parseImage() {
         intent.data?.let {
-            val input = InputImage.fromFilePath(applicationContext, it)
-            textRecViewModelModel.image2Text(input)
+            textRecViewModelModel.image2TextTess(applicationContext, it)
         }
     }
 }
