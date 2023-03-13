@@ -2,7 +2,11 @@ package com.example.ocr_demo
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.bumptech.glide.signature.ObjectKey
 import com.example.ocr_demo.databinding.ActivityResultBinding
@@ -10,16 +14,39 @@ import com.google.mlkit.vision.common.InputImage
 
 class ResultActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityResultBinding
-    private val textRecViewModelModel: TextRecognitionViewModel by viewModels()
+    private val viewModel: TextRecognitionViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityResultBinding.inflate(layoutInflater)
-        textRecViewModelModel.result.observe(this) {
-            viewBinding.text.text = it
-        }
         setContentView(viewBinding.root)
         showImage()
-        parseImage()
+        setupSpinner()
+        viewModel.result.observe(this) {
+            viewBinding.loading.isVisible = false
+            viewBinding.text.text = it
+        }
+        if (savedInstanceState == null) {
+            parseImage("ML-kit")
+        }
+    }
+
+    private fun setupSpinner() {
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.engines_array,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            viewBinding.engines.adapter = adapter
+        }
+
+        viewBinding.engines.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+                parseImage(parent.getItemAtPosition(pos) as String)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) = Unit
+        }
     }
 
     private fun showImage() {
@@ -31,9 +58,22 @@ class ResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun parseImage() {
-        intent.data?.let {
-            textRecViewModelModel.image2TextTess(applicationContext, it)
+    private fun parseImage(engine: String) {
+        viewBinding.loading.isVisible = true
+        viewBinding.text.text = ""
+        when (engine) {
+            "ML-kit" -> {
+                intent.data?.let {
+                    val input = InputImage.fromFilePath(applicationContext, it)
+                    viewModel.image2Text(input)
+                }
+            }
+            "Tesseract" -> {
+                intent.data?.let {
+                    viewModel.image2TextTess(applicationContext, it)
+                }
+            }
+            else -> viewBinding.loading.isVisible = false
         }
     }
 }

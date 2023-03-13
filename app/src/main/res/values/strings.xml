@@ -2,5 +2,11 @@
     <string name="app_name">OCR_demo</string>
     <string name="take_photo">Capture</string>
     <string name="gallery">Gallery</string>
-    <string name="result_texts">Result texts</string>
+    <string name="result_texts">Result</string>
+
+
+    <string-array name="engines_array">
+        <item>ML-kit</item>
+        <item>Tesseract</item>
+    </string-array>
 </resources>

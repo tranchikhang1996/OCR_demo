@@ -16,40 +16,45 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:layout_gravity="center"
             android:id="@+id/image"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
     </FrameLayout>
 
-    <TextView
-        android:padding="8dp"
-        android:id="@+id/title"
-        android:text="@string/result_texts"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/image_frame"
+    <Spinner
+        android:id="@+id/engines"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/image_frame" />
 
     <ScrollView
-        android:padding="8dp"
-        android:background="@color/white"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="@color/white"
         android:orientation="vertical"
+        android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title">
+        app:layout_constraintTop_toBottomOf="@id/engines">
 
         <TextView
-            android:textColor="@color/black"
             android:id="@+id/text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textColor="@color/black" />
     </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/loading"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/engines" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
