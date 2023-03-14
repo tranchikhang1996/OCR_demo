@@ -31,7 +31,7 @@ data class BenchMarkResult(
     @SerializedName("actual") val actual: String,
     @SerializedName("CER") val cer: Double
 ) {
-    val log = "File: $fileName\nExpected: $truth\nActual: $actual\nCER: $cer\n"
+     fun log() = "File: $fileName\nExpected: $truth\nActual: $actual\nCER: $cer\n"
 }
 
 class BenchMarkViewModel(context: Context) : ViewModel() {
@@ -127,7 +127,7 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
         images?.filter { it.isFile }?.forEach { image ->
             val result = verify(image, truth, recognizer)
             benchMarkResults.add(result)
-            Log.d("BENCH_MARK", result.log)
+            Log.d("BENCH_MARK", result.log())
         }
 
         val acer = benchMarkResults.sumOf { it.cer } / benchMarkResults.size
