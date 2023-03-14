@@ -65,6 +65,5 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
     implementation("androidx.fragment:fragment-ktx:1.5.5")
 
-    implementation 'cz.adaptech.tesseract4android:tesseract4android:4.3.0'
     implementation 'com.google.code.gson:gson:2.10.1'
 }
