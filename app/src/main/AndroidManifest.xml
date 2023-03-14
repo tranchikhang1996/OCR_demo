@@ -20,6 +20,9 @@
         android:theme="@style/Theme.OCR_demo"
         tools:targetApi="31">
         <activity
+            android:name=".BenchMarkActivity"
+            android:exported="false" />
+        <activity
             android:name=".ResultActivity"
             android:exported="false" />
         <activity

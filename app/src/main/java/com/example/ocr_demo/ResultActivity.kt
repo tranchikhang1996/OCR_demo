@@ -14,7 +14,10 @@ import com.google.mlkit.vision.common.InputImage
 
 class ResultActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityResultBinding
-    private val viewModel: TextRecognitionViewModel by viewModels()
+    private val viewModel: TextRecognitionViewModel by viewModels {
+        TextRecognitionViewModel.Factory(applicationContext)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityResultBinding.inflate(layoutInflater)
@@ -24,9 +27,6 @@ class ResultActivity : AppCompatActivity() {
         viewModel.result.observe(this) {
             viewBinding.loading.isVisible = false
             viewBinding.text.text = it
-        }
-        if (savedInstanceState == null) {
-            parseImage("ML-kit")
         }
     }
 
@@ -61,19 +61,10 @@ class ResultActivity : AppCompatActivity() {
     private fun parseImage(engine: String) {
         viewBinding.loading.isVisible = true
         viewBinding.text.text = ""
-        when (engine) {
-            "ML-kit" -> {
-                intent.data?.let {
-                    val input = InputImage.fromFilePath(applicationContext, it)
-                    viewModel.image2Text(input)
-                }
-            }
-            "Tesseract" -> {
-                intent.data?.let {
-                    viewModel.image2TextTess(applicationContext, it)
-                }
-            }
-            else -> viewBinding.loading.isVisible = false
+        intent.data?.let {
+            val input = InputImage.fromFilePath(applicationContext, it)
+            viewModel.image2text(input, engine)
         }
+        viewBinding.loading.isVisible = false
     }
 }

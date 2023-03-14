@@ -36,12 +36,19 @@ class MainActivity : AppCompatActivity() {
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
         viewBinding.imageCaptureButton.setOnClickListener { takePhoto() }
+        viewBinding.benchMark.setOnClickListener { benchMark() }
         registerImagePicker()
         initOrientationEventListener()
         if (allPermissionsGranted()) {
             startCamera()
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+        }
+    }
+
+    private fun benchMark() {
+        Intent(this, BenchMarkActivity::class.java).run {
+            startActivity(this)
         }
     }
 
