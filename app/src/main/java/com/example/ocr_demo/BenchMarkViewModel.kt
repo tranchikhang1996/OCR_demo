@@ -14,7 +14,6 @@ import com.google.gson.reflect.TypeToken
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import com.googlecode.tesseract.android.TessBaseAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -37,25 +36,15 @@ data class BenchMarkResult(
 class BenchMarkViewModel(context: Context) : ViewModel() {
     private val accuracyBenchMarker = AccuracyBenchMarker()
     private val mlKitRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-    private val testApi: TessBaseAPI
     private val gson = Gson()
     private val mapType: TypeToken<Map<String, String>> = object : TypeToken<Map<String, String>>() {}
     val benchMarkLog = MutableLiveData<String>()
     private val _benchMarkInfo = StringBuilder()
 
-    init {
-        val dataPath: String = File(context.getExternalFilesDir(null), "tesseract").absolutePath
-        testApi = TessBaseAPI()
-        if (!testApi.init(dataPath, "vie")) {
-            testApi.recycle()
-        }
-    }
-
     fun benchMark(context: Context, engine: String) {
         viewModelScope.launch {
             when (engine) {
                 "ML-kit" -> benchMark(context, engine) { mlKitEngine(context, it) }
-                "Tesseract" -> benchMark(context, engine) { tesseractEngine(context, it) }
             }
         }
     }
@@ -67,12 +56,6 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
                 continuation.resume(it.result.text)
             }
         }
-    }
-
-    private fun tesseractEngine(context: Context, uri: Uri): String {
-        val input = InputImage.fromFilePath(context, uri)
-        testApi.setImage(input.bitmapInternal)
-        return testApi.utF8Text
     }
 
     private suspend fun benchMark(context: Context, engineName: String, recognizer: suspend (Uri) -> String) {
@@ -150,11 +133,6 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
             original,
             cer
         )
-    }
-
-    override fun onCleared() {
-        testApi.recycle()
-        super.onCleared()
     }
 
     class Factory(private val context: Context) : ViewModelProvider.Factory {
