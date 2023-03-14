@@ -10,7 +10,6 @@ import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.bumptech.glide.signature.ObjectKey
 import com.example.ocr_demo.databinding.ActivityResultBinding
-import com.google.mlkit.vision.common.InputImage
 
 class ResultActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityResultBinding
@@ -61,10 +60,6 @@ class ResultActivity : AppCompatActivity() {
     private fun parseImage(engine: String) {
         viewBinding.loading.isVisible = true
         viewBinding.text.text = ""
-        intent.data?.let {
-            val input = InputImage.fromFilePath(applicationContext, it)
-            viewModel.image2text(input, engine)
-        }
         viewBinding.loading.isVisible = false
     }
 }
