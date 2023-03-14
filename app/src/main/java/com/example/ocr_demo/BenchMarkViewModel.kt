@@ -11,18 +11,12 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import com.googlecode.tesseract.android.TessBaseAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import kotlin.coroutines.resume
 
 
 data class BenchMarkResult(
@@ -36,45 +30,13 @@ data class BenchMarkResult(
 
 class BenchMarkViewModel(context: Context) : ViewModel() {
     private val accuracyBenchMarker = AccuracyBenchMarker()
-    private val mlKitRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-    private val testApi: TessBaseAPI
     private val gson = Gson()
     private val mapType: TypeToken<Map<String, String>> = object : TypeToken<Map<String, String>>() {}
     val benchMarkLog = MutableLiveData<String>()
     private val _benchMarkInfo = StringBuilder()
 
-    init {
-        val dataPath: String = File(context.getExternalFilesDir(null), "tesseract").absolutePath
-        testApi = TessBaseAPI()
-        if (!testApi.init(dataPath, "vie")) {
-            testApi.recycle()
-        }
-    }
-
     fun benchMark(context: Context, engine: String) {
-        _benchMarkInfo.clear()
-        benchMarkLog.postValue(_benchMarkInfo.toString())
-        viewModelScope.launch(Dispatchers.Default) {
-            when (engine) {
-                "ML-kit" -> benchMark(context, engine) { mlKitEngine(context, it) }
-                "Tesseract" -> benchMark(context, engine) { tesseractEngine(context, it) }
-            }
-        }
-    }
-
-    private suspend fun mlKitEngine(context: Context, uri: Uri): String {
-        return suspendCancellableCoroutine { continuation ->
-            val input = InputImage.fromFilePath(context, uri)
-            mlKitRecognizer.process(input).continueWith {
-                continuation.resume(it.result.text)
-            }
-        }
-    }
-
-    private fun tesseractEngine(context: Context, uri: Uri): String {
-        val input = InputImage.fromFilePath(context, uri)
-        testApi.setImage(input.bitmapInternal)
-        return testApi.utF8Text
+        viewModelScope.launch {}
     }
 
     private suspend fun benchMark(context: Context, engineName: String, recognizer: suspend (Uri) -> String) {
@@ -152,11 +114,6 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
             original,
             cer
         )
-    }
-
-    override fun onCleared() {
-        testApi.recycle()
-        super.onCleared()
     }
 
     class Factory(private val context: Context) : ViewModelProvider.Factory {
