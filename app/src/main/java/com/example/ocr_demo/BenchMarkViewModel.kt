@@ -52,7 +52,9 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
     }
 
     fun benchMark(context: Context, engine: String) {
-        viewModelScope.launch {
+        _benchMarkInfo.clear()
+        benchMarkLog.postValue(_benchMarkInfo.toString())
+        viewModelScope.launch(Dispatchers.Default) {
             when (engine) {
                 "ML-kit" -> benchMark(context, engine) { mlKitEngine(context, it) }
                 "Tesseract" -> benchMark(context, engine) { tesseractEngine(context, it) }
