@@ -4,6 +4,7 @@
     <string name="gallery">Gallery</string>
     <string name="result_texts">Result</string>
     <string name="benchmark">Benchmark</string>
+    <string name="start_btn">Start</string>
 
 
     <string-array name="engines_array">

@@ -2,8 +2,6 @@ package com.example.ocr_demo
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ScrollView
 import androidx.activity.viewModels
@@ -24,6 +22,12 @@ class BenchMarkActivity : AppCompatActivity() {
             viewBinding.logContainer.fullScroll(ScrollView.FOCUS_DOWN)
         }
         setupSpinner()
+        viewBinding.start.setOnClickListener { startBenchMark() }
+    }
+
+    private fun startBenchMark() {
+        val engine = viewBinding.engines.run { getItemAtPosition(selectedItemPosition) as String }
+        benchMark(engine)
     }
 
     private fun setupSpinner() {
@@ -34,14 +38,6 @@ class BenchMarkActivity : AppCompatActivity() {
         ).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             viewBinding.engines.adapter = adapter
-        }
-
-        viewBinding.engines.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
-                benchMark(parent.getItemAtPosition(pos) as String)
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) = Unit
         }
     }
 

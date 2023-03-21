@@ -54,7 +54,7 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
 
     fun benchMark(context: Context, engine: String) {
         _benchMarkInfo.clear()
-        benchMarkLog.postValue(_benchMarkInfo.toString())
+        showLog("With $engine\n")
         viewModelScope.launch(Dispatchers.Default) {
             when (engine) {
                 "ML-kit" -> benchMark(context, engine) { mlKitEngine(context, it) }
