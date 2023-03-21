@@ -29,7 +29,8 @@ data class BenchMarkResult(
     @SerializedName("file") val fileName: String,
     @SerializedName("expected") val truth: String,
     @SerializedName("actual") val actual: String,
-    @SerializedName("CER") val cer: Double
+    @SerializedName("CER") val cer: Double,
+    @SerializedName("executedTime") val executedTime: Long,
 ) {
      fun log() = "File: $fileName\nExpected: $truth\nActual: $actual\nCER: $cer\n"
 }
@@ -77,23 +78,23 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
         return testApi.utF8Text
     }
 
-    private suspend fun benchMark(context: Context, engineName: String, recognizer: suspend (Uri) -> String) {
+    private suspend fun benchMark(
+        context: Context,
+        engineName: String,
+        recognizer: suspend (Uri) -> String
+    ) {
         context.getExternalFilesDir(null)?.resolve("data-test")
-            ?.listFiles { f -> f.isDirectory }?.forEach { langDir ->
-                langDir.listFiles { f -> f.isDirectory }
-                    ?.forEach { dir ->
-                        val benchMarkResult = benchMark(dir, recognizer)
-                        val json = gson.toJson(benchMarkResult)
-                        val lang = dir.absolutePath.substringBeforeLast(File.separatorChar).trimEnd(File.separatorChar).substringAfterLast(File.separatorChar)
-                        val dirName = dir.absolutePath.trimEnd(File.separatorChar).substringAfterLast(File.separatorChar)
-                        context.getExternalFilesDir(null)?.resolve("benchMark")?.let {
-                            if (!it.exists()) {
-                                it.mkdir()
-                            }
-                            val fileName = "${engineName}_${lang}_${dirName}.json"
-                            saveLog(it.resolve(fileName), json)
-                        }
+            ?.listFiles { f -> f.isDirectory }?.forEach { dir ->
+                val benchMarkResult = benchMark(dir, recognizer)
+                val json = gson.toJson(benchMarkResult)
+                val dirName = dir.absolutePath.trimEnd(File.separatorChar).substringAfterLast(File.separatorChar)
+                context.getExternalFilesDir(null)?.resolve("benchMark")?.let {
+                    if (!it.exists()) {
+                        it.mkdir()
                     }
+                    val fileName = "${engineName}_${dirName}.json"
+                    saveLog(it.resolve(fileName), json)
+                }
             }
         showLog("completed!")
     }
@@ -118,9 +119,8 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
     }
 
     private suspend fun benchMark(dir: File, recognizer: suspend (Uri) -> String): List<BenchMarkResult> {
-        val lang = dir.absolutePath.trimEnd(File.separatorChar).substringBeforeLast(File.separatorChar).trimEnd(File.separatorChar).substringAfterLast(File.separatorChar)
         val dirName = dir.absolutePath.trimEnd(File.separatorChar).substringAfterLast(File.separatorChar)
-        showLog("Benchmark $lang $dirName\n")
+        showLog("Benchmark $dirName\n")
         val images = dir.resolve("images").listFiles()?.sortedBy { it.name.substringBeforeLast('.') }
         val truth = withContext(Dispatchers.IO) {
             FileInputStream(dir.resolve("text/truth.json")).bufferedReader().use { gson.fromJson(it, mapType) }
@@ -133,7 +133,8 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
         }
 
         val acer = benchMarkResults.sumOf { it.cer } / benchMarkResults.size
-        showLog("Average CER on $lang $dirName: $acer\n")
+        val totalTime = benchMarkResults.sumOf { it.executedTime }
+        showLog("${totalTime}ms for $dirName: with Average CER $acer\n")
         return benchMarkResults
     }
 
@@ -143,14 +144,17 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
         recognizer: suspend (Uri) -> String
     ): BenchMarkResult {
         val fileName = image.name.substringBeforeLast('.')
+        val startTime = System.currentTimeMillis()
         val original = recognizer(image.toUri()).formatText()
+        val endTime = System.currentTimeMillis()
         val expected = truths[fileName]?.formatText() ?: throw IllegalStateException()
         val cer = accuracyBenchMarker.calculateCER(original, expected)
         return BenchMarkResult(
             image.absolutePath,
             expected,
             original,
-            cer
+            cer,
+            endTime - startTime
         )
     }
 
