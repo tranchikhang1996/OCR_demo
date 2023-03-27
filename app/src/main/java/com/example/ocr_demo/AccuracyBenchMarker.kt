@@ -4,19 +4,19 @@ data class Record(var minTransform: Int, var numOfCorrectChar: Int)
 
 class AccuracyBenchMarker {
 
-    fun minimumTransformOperation(original: String, target: String): Record {
-        val table = MutableList<List<Record>>(original.length + 1) {
-            MutableList(target.length + 1) { Record(0, 0) }
+    fun minimumTransformOperation(truth: String, prediction: String): Record {
+        val table = MutableList<List<Record>>(truth.length + 1) {
+            MutableList(prediction.length + 1) { Record(0, 0) }
         }
-        for (i in 0..target.length) {
+        for (i in 0..prediction.length) {
             table[0][i].minTransform = i
         }
-        for (i in 0..original.length) {
+        for (i in 0..truth.length) {
             table[i][0].minTransform = i
         }
-        for (i in 1..original.length) {
-            for (j in 1..target.length) {
-                if (original[i - 1] == target[j - 1]) {
+        for (i in 1..truth.length) {
+            for (j in 1..prediction.length) {
+                if (truth[i - 1] == prediction[j - 1]) {
                     table[i][j].minTransform = table[i - 1][j - 1].minTransform
                     table[i][j].numOfCorrectChar = table[i - 1][j - 1].numOfCorrectChar + 1
                 } else {
@@ -33,15 +33,15 @@ class AccuracyBenchMarker {
                 }
             }
         }
-        return table[original.length][target.length]
+        return table[truth.length][prediction.length]
     }
 
     /**
      *  the character error rate is calculated base on the formula in this article
      *  https://towardsdatascience.com/evaluating-ocr-output-quality-with-character-error-rate-cer-and-word-error-rate-wer-853175297510
      * */
-    fun calculateCER(original: String, target: String): Double {
-        val record = minimumTransformOperation(original, target)
+    fun calculateCER(prediction: String, truth: String): Double {
+        val record = minimumTransformOperation(truth, prediction)
         return 100.0 * record.minTransform.toDouble() / (record.minTransform.toDouble() + record.numOfCorrectChar.toDouble())
     }
 }

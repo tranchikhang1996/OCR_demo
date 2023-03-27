@@ -122,12 +122,12 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
         val dirName = dir.absolutePath.trimEnd(File.separatorChar).substringAfterLast(File.separatorChar)
         showLog("Benchmark $dirName\n")
         val images = dir.resolve("images").listFiles()?.sortedBy { it.name.substringBeforeLast('.') }
-        val truth = withContext(Dispatchers.IO) {
+        val truths = withContext(Dispatchers.IO) {
             FileInputStream(dir.resolve("text/truth.json")).bufferedReader().use { gson.fromJson(it, mapType) }
         }
         val benchMarkResults = mutableListOf<BenchMarkResult>()
         images?.filter { it.isFile }?.forEach { image ->
-            val result = verify(image, truth, recognizer)
+            val result = verify(image, truths, recognizer)
             benchMarkResults.add(result)
             Log.d("BENCH_MARK", result.log())
         }
@@ -145,14 +145,14 @@ class BenchMarkViewModel(context: Context) : ViewModel() {
     ): BenchMarkResult {
         val fileName = image.name.substringBeforeLast('.')
         val startTime = System.currentTimeMillis()
-        val original = recognizer(image.toUri()).formatText()
+        val prediction = recognizer(image.toUri()).formatText()
         val endTime = System.currentTimeMillis()
-        val expected = truths[fileName]?.formatText() ?: throw IllegalStateException()
-        val cer = accuracyBenchMarker.calculateCER(original, expected)
+        val truth = truths[fileName]?.formatText() ?: throw IllegalStateException()
+        val cer = accuracyBenchMarker.calculateCER(prediction, truth)
         return BenchMarkResult(
             image.absolutePath,
-            expected,
-            original,
+            truth,
+            prediction,
             cer,
             endTime - startTime
         )
